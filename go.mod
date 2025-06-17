@@ -2,7 +2,10 @@ module rigon-chat-server
 
 go 1.24.1
 
-require gorm.io/gorm v1.30.0
+require (
+	github.com/BurntSushi/toml v1.5.0
+	gorm.io/gorm v1.30.0
+)
 
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
