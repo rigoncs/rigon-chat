@@ -17,8 +17,8 @@ password = ""
 db = 0
 
 [authCodeConfig]
-accessKeyID = "LTAI5tRRgLHQ9j1oqYkPEPRK"
-accessKeySecret = "uOIcYD26i48hTToi4lsnCR6w8H4BJU"
+accessKeyID = ""
+accessKeySecret = ""
 signName = "阿里云短信测试"
 templateCode = "SMS_154950909"
 
