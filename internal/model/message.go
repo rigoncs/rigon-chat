@@ -17,6 +17,7 @@ type Message struct {
 	SendAvatar string       `gorm:"column:send_avatar;type:varchar(255);not null;comment:发送者头像"`
 	ReceiveId  string       `gorm:"column:receive_id;index;type:char(20);not null;comment:接收者uuid"`
 	FileType   string       `gorm:"column:file_type;type:char(10);comment:文件类型"`
+	FileName   string       `gorm:"column:file_name;type:varchar(50);comment:文件名"`
 	FileSize   string       `gorm:"column:file_size;type:char(20);comment:文件大小"`
 	Status     int8         `gorm:"column:status;not null;comment:消息状态,0.未发送,1.已发送"`
 	CreatedAt  time.Time    `gorm:"column:created_at;type:datetime;not null;comment:创建时间"`
