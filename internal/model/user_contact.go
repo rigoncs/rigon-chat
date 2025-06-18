@@ -7,7 +7,7 @@ import (
 
 type UserContact struct {
 	Id          int64          `gorm:"column:id;primaryKey;comment:自增id"`
-	UserId      int64          `gorm:"column:user_id;index;type:char(20);not null;comment:用户唯一id"`
+	UserId      string         `gorm:"column:user_id;index;type:char(20);not null;comment:用户唯一id"`
 	ContactId   string         `gorm:"column:contact_id;index;type:char(20);not null;comment:联系人id"`
 	ContactType int8           `gorm:"column:contact_type;not null;comment:联系人类型,0.用户,1.群"`
 	Status      int8           `gorm:"column:status;not null;comment:联系人状态,0.正常,1.拉黑,2.被拉黑,3.删除好友,4.被删除好友,5.被禁言,6.退出群聊,7.被踢出群聊"`
