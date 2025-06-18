@@ -37,7 +37,13 @@ func GetGroupMessageList(c *gin.Context) {
 }
 
 // UploadAvatar 上传头像
-func UploadAvatar(c *gin.Context) {}
+func UploadAvatar(c *gin.Context) {
+	message, ret := gorm.MessageService.UploadAvatar(c)
+	JSONBack(c, message, ret, nil)
+}
 
 // UploadFile 上传文件
-func UploadFile(c *gin.Context) {}
+func UploadFile(c *gin.Context) {
+	message, ret := gorm.MessageService.UploadFile(c)
+	JSONBack(c, message, ret, nil)
+}
