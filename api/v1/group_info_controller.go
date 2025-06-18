@@ -115,13 +115,40 @@ func GetGroupInfo(c *gin.Context) {
 }
 
 // GetGroupInfoList 获取群组列表 - 管理员
-func GetGroupInfoList(c *gin.Context) {}
+func GetGroupInfoList(c *gin.Context) {
+	message, groupList, ret := gorm.GroupInfoService.GetGroupInfoList()
+	JSONBack(c, message, ret, groupList)
+}
 
 // DeleteGroups 删除群组 - 管理员
-func DeleteGroups(c *gin.Context) {}
+func DeleteGroups(c *gin.Context) {
+	var req request.DeleteGroupsRequest
+	if err := c.BindJSON(&req); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, ret := gorm.GroupInfoService.DeleteGroups(req.UuidList)
+	JSONBack(c, message, ret, nil)
+}
 
 // SetGroupsStatus 设置群组是否启用
-func SetGroupsStatus(c *gin.Context) {}
+func SetGroupsStatus(c *gin.Context) {
+	var req request.SetGroupsStatusRequest
+	if err := c.BindJSON(&req); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, ret := gorm.GroupInfoService.SetGroupsStatus(req.UuidList, req.Status)
+	JSONBack(c, message, ret, nil)
+}
 
 // UpdateGroupInfo 更新群组信息
 func UpdateGroupInfo(c *gin.Context) {
