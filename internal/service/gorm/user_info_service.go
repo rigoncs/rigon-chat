@@ -1,8 +1,10 @@
 package gorm
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 	"rigon-chat-server/internal/dao"
 	"rigon-chat-server/internal/dto/request"
@@ -187,4 +189,73 @@ func (u *userInfoService) checkTelephoneExist(telephone string) (string, int) {
 	message := "该电话已经存在，注册失败"
 	zlog.Info(message)
 	return message, -2
+}
+
+// UpdateUserInfo 更新用户信息
+// 某用户修改了信息，可能会影响contact_user_list，不需要删除redis的contact_user_list，timeout之后会自己更新
+// 但是需要更新redis的user_info，因为可能影响用户搜索
+func (u *userInfoService) UpdateUserInfo(updateReq request.UpdateUserInfoRequest) (string, int) {
+	var user model.UserInfo
+	if res := dao.GormDB.Where("uuid = ?", updateReq.Uuid).First(&user); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, -1
+	}
+	if updateReq.Email != "" {
+		user.Email = updateReq.Email
+	}
+	if updateReq.Nickname != "" {
+		user.Nickname = updateReq.Nickname
+	}
+	if updateReq.Signature != "" {
+		user.Signature = updateReq.Signature
+	}
+	if updateReq.Avatar != "" {
+		user.Avatar = updateReq.Avatar
+	}
+	if updateReq.Birthday != "" {
+		user.Birthday = updateReq.Birthday
+	}
+	if res := dao.GormDB.Save(&user); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, -1
+	}
+	return "修改用户信息成功", 0
+}
+
+// GetUserInfo 获取用户信息
+func (u *userInfoService) GetUserInfo(uuid string) (string, *respond.GetUserInfoRespond, int) {
+	zlog.Info(uuid)
+	rspString, err := myredis.GetKeyNilIsErr("user_info_" + uuid)
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			zlog.Info(err.Error())
+			var user model.UserInfo
+			if res := dao.GormDB.Where("uuid = ?", uuid).Find(&user); res.Error != nil {
+				zlog.Error(res.Error.Error())
+				return constants.SYSTEM_ERROR, nil, -1
+			}
+			rsp := respond.GetUserInfoRespond{
+				Uuid:      user.Uuid,
+				Avatar:    user.Avatar,
+				Nickname:  user.Nickname,
+				Signature: user.Signature,
+				Gender:    user.Gender,
+				Birthday:  user.Birthday,
+				Email:     user.Email,
+				Status:    user.Status,
+				Telephone: user.Telephone,
+				CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
+				IsAdmin:   user.IsAdmin,
+			}
+			return "获取用户信息成功", &rsp, 0
+		} else {
+			zlog.Error(err.Error())
+			return constants.SYSTEM_ERROR, nil, -1
+		}
+	}
+	var rsp respond.GetUserInfoRespond
+	if err := json.Unmarshal([]byte(rspString), &rsp); err != nil {
+		zlog.Error(err.Error())
+	}
+	return "获取用户信息成功", &rsp, 0
 }

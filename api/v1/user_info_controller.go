@@ -57,7 +57,19 @@ func SmsLogin(c *gin.Context) {
 }
 
 // UpdateUserInfo 修改用户信息
-func UpdateUserInfo(c *gin.Context) {}
+func UpdateUserInfo(c *gin.Context) {
+	var req request.UpdateUserInfoRequest
+	if err := c.BindJSON(&req); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, ret := gorm.UserInfoService.UpdateUserInfo(req)
+	JSONBack(c, message, ret, nil)
+}
 
 // GetUserInfoList 获取用户列表
 func GetUserInfoList(c *gin.Context) {}
@@ -69,7 +81,19 @@ func AbleUsers(c *gin.Context) {}
 func DisableUsers(c *gin.Context) {}
 
 // GetUserInfo 获取用户信息
-func GetUserInfo(c *gin.Context) {}
+func GetUserInfo(c *gin.Context) {
+	var req request.GetUserInfoRequest
+	if err := c.ShouldBind(&req); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, userinfo, ret := gorm.UserInfoService.GetUserInfo(req.Uuid)
+	JSONBack(c, message, ret, userinfo)
+}
 
 // DeleteUsers 删除用户
 func DeleteUsers(c *gin.Context) {}
