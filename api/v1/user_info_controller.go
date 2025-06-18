@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"rigon-chat-server/internal/dto/request"
@@ -10,7 +11,20 @@ import (
 )
 
 // Register 注册
-func Register(c *gin.Context) {}
+func Register(c *gin.Context) {
+	var registerReq request.RegisterRequest
+	if err := c.BindJSON(&registerReq); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	fmt.Println(registerReq)
+	message, userInfo, ret := gorm.UserInfoService.Register(registerReq)
+	JSONBack(c, message, ret, userInfo)
+}
 
 // Login 登录
 func Login(c *gin.Context) {
@@ -28,7 +42,19 @@ func Login(c *gin.Context) {
 }
 
 // SmsLogin 验证码登陆
-func SmsLogin(c *gin.Context) {}
+func SmsLogin(c *gin.Context) {
+	var req request.SmsLoginRequest
+	if err := c.BindJSON(&req); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, userInfo, ret := gorm.UserInfoService.SmsLogin(req)
+	JSONBack(c, message, ret, userInfo)
+}
 
 // UpdateUserInfo 修改用户信息
 func UpdateUserInfo(c *gin.Context) {}
@@ -52,4 +78,16 @@ func DeleteUsers(c *gin.Context) {}
 func SetAdmin(c *gin.Context) {}
 
 // SendSmsCode 发送短信验证码
-func SendSmsCode(c *gin.Context) {}
+func SendSmsCode(c *gin.Context) {
+	var req request.SendSmsCodeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		zlog.Error(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, ret := gorm.UserInfoService.SendSmsCode(req.Telephone)
+	JSONBack(c, message, ret, nil)
+}
